@@ -1,0 +1,81 @@
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+### Archivo Cuenta.java
+
+private double saldo = 0;
+- Esto se debe hacer al momento de llamar al constructor Cuenta(), no dentro de la misma clase
+Puedo tener ctas que arranquen con saldo = 0, saldo = 500 etc ..
+--------------------------------------------------------------------------------------
+
+- Falta validar el saldo al momento de instanciar un objeto de la Clase Cuenta
+(un saldo inicial negativo no puede ser inicial)
+--------------------------------------------------------------------------------------
+
+private List<Movimiento> movimientos = new ArrayList<>();
+- Esto ya se hace en el metodo setMovimientos(...) pasando una lista ya creada
+Es innecesario que ya de entrada la Clase tenga el new en la lista de movimientos
+--------------------------------------------------------------------------------------
+
+- Dentro del metodo poner(...) falta abstraer las validaciones, en vez de estar
+todos los ifs en el mismo metodo
+- Lo mismo se aplica en sacar(...)
+--------------------------------------------------------------------------------------
+
+if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
+    throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
+    }
+- Falta abstraer la logica dentro de este if, dentro del metodo poner(...)
+--------------------------------------------------------------------------------------
+
+Movimiento movimiento = new Movimiento(fecha, cuanto, esDeposito);
+movimientos.add(movimiento);
+- Es innecesaria el uso la variable "movimiento" si solo la uso UNA VEZ SOLO para pasarla por parametro
+a otro metodo (en este caso add(...)), dentro del metodo agregarMovimiento(...)
+--------------------------------------------------------------------------------------
+
+if (cuanto <= 0) {
+  throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
+}
+- La validacion se repite 2 veces en poner(...) y sacar(...), hay que abstraer esa validacion
+--------------------------------------------------------------------------------------
+
+double montoExtraidoHoy = getMontoExtraidoA(LocalDate.now());
+double limite = 1000 - montoExtraidoHoy;
+if (cuanto > limite) {
+  throw new MaximoExtraccionDiarioException("No puede extraer mas de $ " + 1000
+      + " diarios, límite: " + limite);
+}
+
+- ESTO es una validacion metida dentro del metodo sacar(...), deberia estar separado de lo que en realidad
+hace el metodo ya que confunde la validacion contra lo que se hace en el metodo
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+### Archivo Movimiento.java
+
+ALGO FUNDAMENTAL es que tanto los depositos como las extracciones son MOVIMIENTOS, por ende, no tiene sentido
+que exista ese parametro de esDeposito en un movimiento, sino que puedo abtraerlo en una Clase Deposito que herede de movimiento
+ya que el Deposito logicamente es un Movimiento (poner plata en el monedero suena algo logico)
+
+Lo mismo aplica para los retiros o extracciones, SON MOVIMIENTOS
+El metodo esDeposito deberia estar en la clase que tenga ese comportaminto (Deposito y Retiro)
+--------------------------------------------------------------------------------------
+
+- El metodo calcularValor(...) va a cada clase particular que hereda de Movimiento
+ya que se calcula de forma diferente en base a si es un Deposito o retiro
+--------------------------------------------------------------------------------------
+
+agregarMovimiento(...) dentro de la clase Cuenta no debe saber como esta hecho un movimiento
+En vez de pasarle los atributos del movimiento (fecha, monto) es mas preferible ocultar
+los detalles de esa clase, pasandole Directamente la instancia (Movimiento)
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+### Archivo MonederoTest.java
+
+- En el test TresDepositos() no se esta haciendo ninguna asercion
+
+-- En general, los nombres de los test son pocos expresivos y no da a entender que es lo que
+se esta probando
+
+-- Por convencion en java, los tests debe tener la firma declarada como `public void testX(...)`
+
+-- Los metodos fueDepositado(...) y fueExtraido(...) no se estan utilizando en ninguna parte
